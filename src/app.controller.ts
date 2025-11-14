@@ -19,7 +19,7 @@ export class AppController {
 
   @Post()
   @Header('Content-Type', 'application/json')
-  handleWebhook(@Body() body: ZoomWebhookBody) {
+  handleWebhook(@Body() body: any) {
     if (!body) {
       this.logger.warn('Webhook recibido sin body');
       return { message: 'Body vacío' };
