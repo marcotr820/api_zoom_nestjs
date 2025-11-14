@@ -28,6 +28,8 @@ export class AppController {
 
     console.log(body);
 
+    console.log(zoomSecret);
+
     // Validación de la firma (opcional pero recomendada)
     // Si quieres validar x-zm-signature, necesitas usar @Req() o un middleware
     // Aquí asumimos que lo estás recibiendo correctamente
