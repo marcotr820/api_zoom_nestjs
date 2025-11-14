@@ -44,7 +44,7 @@ export class AppController {
       const plainToken = body.payload.plainToken;
       const encryptedToken = createHmac('sha256', zoomSecret)
         .update(plainToken)
-        .digest('hex');
+        .digest('base64');
 
       this.logger.log('Respondiento challenge a Zoom', {
         plainToken,
