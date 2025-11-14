@@ -41,7 +41,7 @@ export class AppController {
 
       const encryptedToken = createHmac('sha256', zoomSecret)
         .update(plainToken)
-        .digest('base64');  // <-- OBLIGATORIO base64
+        .digest('hex');
 
       console.log('Enviando respuesta de validación:', {
         plainToken,
