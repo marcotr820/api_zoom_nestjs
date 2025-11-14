@@ -18,7 +18,7 @@ export class AppController {
   private readonly logger = new Logger(AppController.name);
 
   @Post()
-  @HttpCode(200)
+  @HttpCode(200) //siempre debe devolver 200 esta en la documentacion de zoom para la validacion de la url
   handleWebhook(@Body() body: ZoomWebhookBody) {
     if (!body) {
       this.logger.warn('Webhook recibido sin body');
