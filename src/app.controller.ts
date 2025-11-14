@@ -1,39 +1,17 @@
-import { Body, Controller, Header, Logger, Post } from '@nestjs/common';
+import { Controller, Logger, Post, Req, Res } from '@nestjs/common';
 import { createHmac } from 'crypto';
-
-// DTO para el body del webhook
-interface ZoomWebhookPayload {
-  plainToken?: string;
-  object?: any; // Puedes tipar según eventos que recibas
-}
-
-interface ZoomWebhookBody {
-  event: string;
-  event_ts: number;
-  payload: ZoomWebhookPayload;
-}
+import type { Response, Request } from 'express';
 
 @Controller('webhook')
 export class AppController {
   private readonly logger = new Logger(AppController.name);
 
   @Post()
-  @Header('Content-Type', 'application/json')
-  handleWebhook(@Body() body: any) {
-    if (!body) {
-      this.logger.warn('Webhook recibido sin body');
-      return { message: 'Body vacío' };
-    }
+  handleWebhook(@Req() req: Request, @Res() res: Response) {
+    const body = req.body; // o req.rawBody si usas rawBody
 
     const zoomSecret = process.env.ZOOM_SECRET_TOKEN ?? '';
 
-    console.log(body);
-
-    // Validación de la firma (opcional pero recomendada)
-    // Si quieres validar x-zm-signature, necesitas usar @Req() o un middleware
-    // Aquí asumimos que lo estás recibiendo correctamente
-
-    // Validación del challenge
     if (body.event === 'endpoint.url_validation' && body.payload.plainToken) {
       const plainToken = body.payload.plainToken;
       const encryptedToken = createHmac('sha256', zoomSecret)
@@ -45,25 +23,13 @@ export class AppController {
         encryptedToken,
       });
 
-      return {
+      // ✅ DEVOLVER 200 explícitamente
+      return res.status(200).json({
         plainToken,
         encryptedToken,
-      };
+      });
     }
 
-    // Manejo de eventos normales
-    this.logger.log('Evento autorizado de Zoom', body.event);
-
-    // Aquí podrías manejar otros eventos como recording.started, recording.completed, etc.
-    // Ejemplo:
-    if (body.event === 'recording.started') {
-      this.logger.log('Grabación iniciada', body.payload);
-    }
-    if (body.event === 'recording.completed') {
-      this.logger.log('Grabación completada', body.payload);
-      // Aquí podrías llamar a tu servicio para descargar el video
-    }
-
-    return { status: 'ok' };
+    return res.status(200).json({ status: 'ok' });
   }
 }
