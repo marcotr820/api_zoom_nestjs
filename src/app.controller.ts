@@ -1,4 +1,4 @@
-import { Body, Controller, Logger, Post } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Post } from '@nestjs/common';
 import { createHmac } from 'crypto';
 
 // DTO para el body del webhook
@@ -16,6 +16,11 @@ interface ZoomWebhookBody {
 @Controller('webhook')
 export class AppController {
   private readonly logger = new Logger(AppController.name);
+
+  @Get()
+  test() {
+    return 'hola mundo';
+  }
 
   @Post()
   handleWebhook(@Body() body: ZoomWebhookBody) {
