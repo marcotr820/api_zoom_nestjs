@@ -1,5 +1,8 @@
 import { Body, Controller, HttpCode, Logger, Post } from '@nestjs/common';
+<<<<<<< HEAD
 import axios from 'axios';
+=======
+>>>>>>> 1a3b58d0ea67d93053a0830beb76f7965bca9562
 import { createHmac } from 'crypto';
 import { AppService } from './app.service';
 
@@ -34,8 +37,13 @@ export class AppController {
   constructor(private readonly appService: AppService){}
 
   @Post()
+<<<<<<< HEAD
   @HttpCode(200)
   async handleWebhook(@Body() body: ZoomWebhookBody) {
+=======
+  @HttpCode(200) //siempre debe devolver 200 esta en la documentacion de zoom para la validacion de la url
+  handleWebhook(@Body() body: ZoomWebhookBody) {
+>>>>>>> 1a3b58d0ea67d93053a0830beb76f7965bca9562
     if (!body) {
       this.logger.warn('Webhook recibido sin body');
       return { message: 'Body vacío' };
