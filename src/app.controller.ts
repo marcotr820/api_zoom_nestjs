@@ -41,9 +41,8 @@ export class AppController {
       return { message: 'Body vacío' };
     }
 
-    await this.appService.processEvent(body);
+    return await this.appService.processEvent(body);
 
-    return;
 
     // Manejo de eventos normales
     //this.logger.log('Evento autorizado de Zoom', body.event);

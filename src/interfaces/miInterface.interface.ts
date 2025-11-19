@@ -1,3 +1,15 @@
+// DTO para el body del webhook
+interface ZoomWebhookPayload {
+  plainToken?: string;
+  object?: any; // Puedes tipar según eventos que recibas
+}
+
+interface ZoomWebhookBody {
+  event: string;
+  event_ts: number;
+  payload: ZoomWebhookPayload;
+}
+
 // ===========================================================
 // RESPONSE GET RECORDINGS download_url
 // ===========================================================
