@@ -31,9 +31,9 @@ export class AppService {
       /*case 'recording.paused':
         return this.onRecordingPaused(body);
       case 'recording.resumed':
-        return this.onRecordingResumed(body);
+        return this.onRecordingResumed(body);*/
       case 'recording.completed':
-        return this.onRecordingCompleted(body);*/
+        return this.onRecordingCompleted(body);
 
       case 'meeting.summary_completed':
         this.saveSummaryAsHtml(
@@ -52,7 +52,6 @@ export class AppService {
         );*/
         return;
       case 'meeting.aic_transcript_completed':
-        console.log('meeting.aic_transcript_completed', body);
         return;
       /*case 'meeting.aic_transcript_completed':
         console.log('AIC_TRANSCRIPT_COMPLETED(AIC TRANSCRIPCION)', body);*/
@@ -86,26 +85,61 @@ export class AppService {
     console.log('▶️ Grabación reanudada');
   }
 
+  /**
+   * Obtener token y url para mandarlos
+   * @param e
+   */
   private async onRecordingCompleted(e: RecordingCompletedEvent) {
-
     try {
-      // * Obtener token OAuth S2S
+
       const tokenS2S = await this.getAccessTokenS2S();
 
       // * Obtener links de grabación
-      const recordingFiles = await this.getRecordingFiles(e.payload.object.uuid, tokenS2S ?? '');
-      console.log(recordingFiles);
+      const recordingFiles = await this.getRecordingFiles(e.payload.object.uuid);
+      console.log('URL links', recordingFiles);
+
+      // Crear carpeta 'summaries' si no existe
+      const dir = path.join(__dirname, '..', 'videos');
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      // Ruta de la carpeta específica dentro de "videos" que sera el id de la reunion
+      const folderPath = path.join(dir, this.sanitizeFilename(recordingFiles[0].meeting_id));
+
+      // Verifica si existe la carpeta específica
+      if (!fs.existsSync(folderPath)) {
+        fs.mkdirSync(folderPath);
+        console.log(`Carpeta "${folderPath}" creada dentro de "videos"`);
+      }
+
+      for (const file of recordingFiles) {
+        const fileName = `${file.id}.${file.file_type.toLowerCase()}`;
+        const filePath = path.join(folderPath, fileName); // ← aquí es donde se guarda el archivo
+        
+        //const downloadUrl = `${file.download_url}`; // URL que devuelve la API
+        const writer = fs.createWriteStream(filePath);
+        
+        const response = await axios.get(file.download_url, {
+          headers: {
+            Authorization: `Bearer ${tokenS2S}`, // Token S2S
+          },
+          responseType: 'stream',
+        });
+
+        response.data.pipe(writer);
+
+        await new Promise<void>((resolve, reject) => {
+          writer.on('finish', () => resolve());       // ✅ envolver en arrow sin parámetros
+          writer.on('error', (err) => reject(err));  // ✅ pasar el error explícitamente
+        });
+
+        console.log(`Archivo guardado en ${folderPath}`);
+      }
 
     } catch (error: any) {
       console.error('Error:', error.response?.data || error.message);
     }
-
-    /*console.log(
-      '✅ Grabación completada. Archivos:',
-      e.payload.object.recording_files.length,
-    );
-
-    console.log('🔗 URL compartida:', e.payload.object.share_url);*/
   }
 
   private onEndpointUrlValidarion(plainToken: string) {
@@ -157,24 +191,28 @@ export class AppService {
    * @param tokenS2s 
    * @returns 
    */
-  private async getRecordingFiles(meetingId: string, tokenS2s: string): Promise<ZoomRecording[]> {
+  private async getRecordingFiles(meetingId: string): Promise<ZoomRecording[]> {
     /*
       Tenemos que realizar esta consulta para que nos permita obtener las url que sirven para descargar
       los documentos, ya que el evento recording.complete nos devuelve las urls de los archivos pero no
       funciona para descargarlos ya se reviso distintas partes de los foros donde se presentaba estos problemas
     */
     try {
+
+      // * Obtener token OAuth S2S
+      const tokenS2S = await this.getAccessTokenS2S();
+
       const recordingsResponse = await axios.get(
         /*`https://api.zoom.us/v2/meetings/${meetingId}/recordings?include_fields=download_access_token&ttl=3600`*/
         `https://api.zoom.us/v2/meetings/${meetingId}/recordings`,
         {
           headers: {
-            Authorization: `Bearer ${tokenS2s}`,
+            Authorization: `Bearer ${tokenS2S}`,
           },
         }
       );
 
-      return recordingsResponse.data.recording_files as ZoomRecording[];
+      return recordingsResponse.data.recording_files.filter(obj => obj.file_type === 'MP4') as ZoomRecording[];
     } catch (error) {
       throw new HttpException('Error al obtener las grabaciones', HttpStatus.BAD_REQUEST);
     }
@@ -303,5 +341,9 @@ export class AppService {
       throw err;
     }
   }
+
+  /**
+   * Descargar videos con las URL obtenidas
+   */
 
 }
