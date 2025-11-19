@@ -1,98 +1,123 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { MeetingEndedEvent, MeetingStartedEvent, RecordingCompletedEvent, RecordingPausedEvent, RecordingResumedEvent, RecordingStartedEvent, RecordingStoppedEvent, ZoomRecording, ZoomTokenData, ZoomWebhookEvent } from './interfaces/miInterface.interface';
 import axios from 'axios';
-import * as fs from 'fs';
-import * as path from 'path';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
-  }
 
-  async handleRecordingCompleted(body: any) {
-    const files = body.payload.object.recording_files;
+  private readonly accountId = process.env.ZOOM_APP_ACCOUNT_ID ?? '';
+  private readonly clientId = process.env.ZOOM_APP_CLIEND_ID ?? '';
+  private readonly clientSecret = process.env.ZOOM_APP_CLIENT_SECRET ?? '';
+  private readonly zoomAppToken = process.env.ZOOM_APP_TOKEN ?? '';
+  private readonly logger = new Logger(AppService.name);
 
-    console.log('Archivos disponibles:', files.length);
-
-    for (const file of files) {
-      await this.downloadRecordingFile(file);
+  processEvent(body: ZoomWebhookEvent) {
+    switch (body.event) {
+      case 'meeting.started':
+        return this.onMeetingStarted(body);
+      case 'meeting.ended':
+        return this.onMeetingEnded(body);
+      case 'recording.started':
+        return this.onRecordingStarted(body);
+      case 'recording.stopped':
+        return this.onRecordingStopped(body);
+      case 'recording.paused':
+        return this.onRecordingPaused(body);
+      case 'recording.resumed':
+        return this.onRecordingResumed(body);
+      case 'recording.completed':
+        return this.onRecordingCompleted(body);
+      default:
+        console.log('Evento desconocido:', body);
     }
   }
 
-  // DESCARGAR CADA ARCHIVO
-  /*async downloadRecordingFile(file: any, access_token:string) {
+  private onMeetingStarted(e: MeetingStartedEvent) {
+    console.log('➡️ Reunión iniciada:', e);
+  }
 
-    const url = `${file.download_url}?access_token=${access_token}`;
+  private onMeetingEnded(e: MeetingEndedEvent) {
+    console.log('⛔ Reunión finalizada:', e);
+  }
 
-    const fileName = `${file.id}.${file.file_extension}`;
-    const filePath = path.join(__dirname, '../../downloads', fileName);
+  private onRecordingStarted(e: RecordingStartedEvent) {
+    console.log('🎬 Grabación iniciada:', e.payload.object.uuid);
+  }
 
-    console.log("Descargando:", url);
+  private onRecordingStopped(e: RecordingStoppedEvent) {
+    console.log('🛑 Grabación detenida:', e.payload.object.uuid);
+  }
 
-    const writer = fs.createWriteStream(filePath);
+  private onRecordingPaused(e: RecordingPausedEvent) {
+    console.log('⏸ Grabación en pausa');
+  }
 
-    const response = await axios.get(url, {
-        responseType: 'arraybuffer',
-      });
+  private onRecordingResumed(e: RecordingResumedEvent) {
+    console.log('▶️ Grabación reanudada');
+  }
 
-    response.data.pipe(writer);
+  private async onRecordingCompleted(e: RecordingCompletedEvent) {
 
-    return new Promise((resolve) => {
-      writer.on('finish', () => {
-        console.log("Archivo guardado:", filePath);
-        resolve(true);
-      });
-    });
-  }*/
-
-  async downloadRecordingFile(
-    file: any
-  ): Promise<boolean> {
     try {
-      //const url = `${file.download_url}?access_token=${access_token}`;
-      // Asegurar extensión en minúsculas
-      const extension = file.file_extension?.toLowerCase() || 'dat';
+      // * Obtener token OAuth S2S
+      const tokenS2S = await this.getAccessTokenS2S();
 
-      const downloadsFolder = path.join(__dirname, '../../downloads');
+      // * Obtener links de grabación
+      const recordingFiles = await this.getRecordingFiles(e.payload.object.uuid, tokenS2S ?? '');
+      console.log(recordingFiles);
+      
 
-      // Crear carpeta si no existe
-      if (!fs.existsSync(downloadsFolder)) {
-        fs.mkdirSync(downloadsFolder, { recursive: true });
-      }
+    } catch (error: any) {
+      console.error('Error:', error.response?.data || error.message);
+    }
 
-      const fileName = `${file.id}.${extension}`;
-      const filePath = path.join(downloadsFolder, fileName);
+    /*console.log(
+      '✅ Grabación completada. Archivos:',
+      e.payload.object.recording_files.length,
+    );
 
-      console.log(`📥 Descargando archivo desde: ${file.download_url}`);
+    console.log('🔗 URL compartida:', e.payload.object.share_url);*/
+  }
 
-      // Solicitar como stream, mejor que arraybuffer
-      const response = await axios.get(file.download_url, {
-        responseType: 'stream',
+  private async getAccessTokenS2S() {
+    const tokenUrl = `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${this.accountId}`;
+
+    const authHeader = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
+    
+    try {
+      const response = await axios.post<ZoomTokenData>(tokenUrl, null, {
         headers: {
-          Authorization: `Bearer eyJzdiI6IjAwMDAwMiIsImFsZyI6IkhTNTEyIiwidiI6IjIuMCIsImtpZCI6ImEyNjAyNjU0LWY4M2EtNGExNi05ZWE2LTZiN2Y2OTI1MDQ0ZCJ9.eyJhdWQiOiJodHRwczovL29hdXRoLnpvb20udXMiLCJ1aWQiOiJXRExaQ2ZnQ1RrZTV2bVd3NUt0clVRIiwidmVyIjoxMCwiYXVpZCI6ImVlNmVlNGZmOGUzZDYzYmY2ODZmMTFiMTJlZDAyYjAzMzIyZjI1ZGZmMzdlZGMzYzFkYWViY2I3NmE5ODEwNmQiLCJuYmYiOjE3NjM0MzM1MzgsImNvZGUiOiJkZ2ZYOFZxUlFqMl95Ni1HQWZ6SGZnTWFxVXpYQkc4V0UiLCJpc3MiOiJ6bTpjaWQ6eG05c3pxd3VTNjJpZ2lSQ1JKUmx3QSIsImdubyI6MCwiZXhwIjoxNzYzNDM3MTM4LCJ0eXBlIjozLCJpYXQiOjE3NjM0MzM1MzgsImFpZCI6InlMUnlGRzVkUlppSkwyQWhxMV9vUXcifQ.Dgux-FRDZ2KIXZFpy-dc_yTj0jvSQyKIMl3u0OJwY2Lh0dl-EvDk64Od_XYXSPx0XIe4vRp7GYUGZQiNYYEEhA`,
+          'Authorization': `Basic ${authHeader}`,
         },
       });
-
-      // Stream hacia archivo
-      const writer = fs.createWriteStream(filePath);
-
-      response.data.pipe(writer);
-
-      // Envolver en promesa para esperar finalización
-      return new Promise((resolve, reject) => {
-        writer.on('finish', () => {
-          console.log(`✅ Archivo guardado en: ${filePath}`);
-          resolve(true);
-        });
-
-        writer.on('error', (err) => {
-          console.error('❌ Error escribiendo archivo:', err);
-          reject(err);
-        });
-      });
+      
+      if (response.data.access_token) {
+        return response.data.access_token;
+      } else {
+        console.error('No se encontrar el token en la respuesta');
+      }
     } catch (error) {
-      console.error('❌ Error descargando archivo de Zoom:', error);
-      return false;
+      console.error('Error al obtener el token:', error.response?.data || error.message);
+      throw new HttpException('Error al obtener token de Zoom', HttpStatus.INTERNAL_SERVER_ERROR);
     }
+  }
+
+  private async getRecordingFiles(meetingId: string, tokenS2s: string): Promise<ZoomRecording[]> {
+    try {
+      const recordingsResponse = await axios.get(
+        /*`https://api.zoom.us/v2/meetings/${meetingId}/recordings?include_fields=download_access_token&ttl=3600`*/
+        `https://api.zoom.us/v2/meetings/${meetingId}/recordings`,
+        {
+          headers: {
+            Authorization: `Bearer ${tokenS2s}`,
+          },
+        }
+      );
+
+      return recordingsResponse.data.recording_files as ZoomRecording[];
+    } catch (error) {
+      throw new HttpException('Error al obtener las grabaciones', HttpStatus.BAD_REQUEST);
+    }
+    
   }
 }
