@@ -92,10 +92,10 @@ export class AppService {
   private async onRecordingCompleted(e: RecordingCompletedEvent) {
     try {
 
-      const tokenS2S = await this.getAccessTokenS2S();
+      const tokenS2S = e.download_token //await this.getAccessTokenS2S();
 
       // * Obtener links de grabación
-      const recordingFiles = await this.getRecordingFiles(e.payload.object.uuid);
+      const recordingFiles = e.payload.object.recording_files.filter(obj => obj.file_type === 'MP4') as ZoomRecording[] //await this.getRecordingFiles(e.payload.object.uuid);
       console.log('URL links', recordingFiles);
 
       // Crear carpeta 'summaries' si no existe
@@ -122,7 +122,7 @@ export class AppService {
         
         const response = await axios.get(file.download_url, {
           headers: {
-            Authorization: `Bearer ${tokenS2S}`, // Token S2S
+            Authorization: `Bearer ${tokenS2S}`, // token del que viene en el evento recording.completed -> e.download_token
           },
           responseType: 'stream',
         });

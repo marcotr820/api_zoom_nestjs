@@ -1,13 +1,11 @@
-// DTO para el body del webhook
-interface ZoomWebhookPayload {
-  plainToken?: string;
-  object?: any; // Puedes tipar según eventos que recibas
-}
 
-interface ZoomWebhookBody {
-  event: string;
-  event_ts: number;
-  payload: ZoomWebhookPayload;
+export interface ZoomUrlValidation extends ZoomEventBase {
+  event: 'endpoint.url_validation';
+  payload: ZoomEventBase["payload"] & {
+    // * con ZoomEventBase["payload"] cargamos el payload del padre
+    // * y con plainToken: string lo volvemos obligatorio
+    plainToken: string;
+  };
 }
 
 // ===========================================================
@@ -47,6 +45,7 @@ export interface ZoomEventBase {
   payload: {
     account_id: string;
     object: any;
+    plainToken?: string;
   };
 }
 
@@ -59,7 +58,8 @@ export interface RecordingFileInfo {
   recording_end?: string;
   file_type?: string;
   file_size?: number;
-  download_url?: string;
+  file_extension: string;
+  download_url: string;
   status?: string;
   play_url?: string;
   recording_type?: string; // TODO mio
@@ -182,6 +182,54 @@ export interface RecordingStoppedEvent extends ZoomEventBase {
 }
 
 // ===========================================================
+// SUMMARY.COMPLETED
+// ===========================================================
+export interface SummaryCompletedObject {
+  meeting_uuid: string;
+  meeting_topic: string;
+  summary_title: string;
+  summary_content: string;
+  [key: string]: any;
+}
+
+export interface SummaryCompletedEvent extends ZoomEventBase {
+  event: 'meeting.summary_completed';
+  payload: {
+    account_id: string;
+    object: SummaryCompletedObject;
+  };
+}
+
+// ===========================================================
+// TRANSCRIPT.COMPLETED
+// ===========================================================
+export interface TranscriptCompletedRecFiles {
+  id: number;
+  meeting_id: string;
+  file_type: string;
+  file_extension: string;
+  file_size: number;
+  download_url: string;
+  [key: string]: any;
+}
+
+export interface TranscriptCompletedObject {
+  uuid: string;
+  id: number;
+  recording_files: TranscriptCompletedRecFiles[];
+  [key: string]: any;
+}
+
+export interface TranscriptCompletedEvent extends ZoomEventBase {
+  event: 'recording.transcript_completed';
+  payload: {
+    account_id: string;
+    object: TranscriptCompletedObject
+  };
+  download_token: string;
+}
+
+// ===========================================================
 // RECORDING.COMPLETED
 // ===========================================================
 export interface RecordingCompletedObject {
@@ -241,10 +289,13 @@ export interface MeetingEndedEvent extends ZoomEventBase {
 // UNIÓN DE TODOS LOS EVENTOS QUE PROPORCIONASTE
 // ===========================================================
 export type ZoomWebhookEvent =
+  | ZoomUrlValidation
   | MeetingStartedEvent
   | MeetingEndedEvent
   | RecordingPausedEvent
   | RecordingResumedEvent
   | RecordingStartedEvent
   | RecordingStoppedEvent
+  | SummaryCompletedEvent
+  | TranscriptCompletedEvent
   | RecordingCompletedEvent;
