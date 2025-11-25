@@ -27,7 +27,7 @@ export class ZoomTokenService {
       );
 
       const token = response.data.access_token;
-      // console.log(token);
+      console.log(token);
       return token;
     } catch (error) {
       console.error('Error obteniendo token S2S:', error.response?.data || error.message);

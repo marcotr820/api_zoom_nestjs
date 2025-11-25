@@ -1,4 +1,15 @@
+export interface ZoomMeetingDetails {
+  uuid: string;
+  id: number;
+  host_id: string;
+  created_at: string;
+  status: string;
+  host_email?: string;
+}
 
+// ===========================================================
+// ZOOM ENDPOINT VALIDATION 
+// ===========================================================
 export interface ZoomUrlValidation extends ZoomEventBase {
   event: 'endpoint.url_validation';
   payload: ZoomEventBase["payload"] & {

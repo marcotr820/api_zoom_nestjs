@@ -22,7 +22,8 @@ export class AppController {
     }
 
     if (body.payload.object.host_id === 'WDLZCfgCTke5vmWw5KtrUQ') {
-      console.log(body);
+      //console.log(body);
+      await this.zoomWebhookService.getCurrentMeet();
     }
 
     //await this.zoomWebhookService.processEvent(body);
