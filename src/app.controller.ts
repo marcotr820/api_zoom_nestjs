@@ -1,13 +1,16 @@
 import { Body, Controller, HttpCode, Logger, Post } from '@nestjs/common';
-import type { ZoomWebhookEvent } from './interfaces/miInterface.interface';
+import type { MeetingStartedEvent, ZoomWebhookEvent } from './interfaces/miInterface.interface';
 import { ZoomWebhookService } from './services/zoom-webhook.service';
+import { ZoomTokenService } from './services/zoom-token.service';
 
 @Controller('webhook')
 export class AppController {
 
   private readonly logger = new Logger(AppController.name);
 
-  constructor(private readonly zoomWebhookService: ZoomWebhookService){}
+  constructor(private readonly zoomWebhookService: ZoomWebhookService,
+    private readonly tokenService: ZoomTokenService
+  ){}
 
   @Post()
   @HttpCode(200)
@@ -18,7 +21,13 @@ export class AppController {
       return { message: 'Body vacío' };
     }
 
-    return await this.zoomWebhookService.processEvent(body);
+    if (body.payload.object.host_id === 'WDLZCfgCTke5vmWw5KtrUQ') {
+      console.log(body);
+    }
+
+    //await this.zoomWebhookService.processEvent(body);
+
+    //await this.tokenService.getS2SToken();
 
     //return { status: 'ok' };
   }

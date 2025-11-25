@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { ZoomWebhookService } from './services/zoom-webhook.service';
 import { ZoomFileService } from './services/zoom-file.service';
+import { ZoomTokenService } from './services/zoom-token.service';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { ZoomFileService } from './services/zoom-file.service';
     }),
   ],
   controllers: [AppController],
-  providers: [AppService, ZoomWebhookService, ZoomFileService],
+  providers: [AppService, ZoomWebhookService, ZoomFileService, ZoomTokenService],
 })
 export class AppModule {}

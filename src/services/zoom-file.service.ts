@@ -36,12 +36,16 @@ export class ZoomFileService {
     return path.join(folderPath, this.sanitizeFilename(fileName)); // ← aquí es donde se guarda el archivo
   }
 
+  getFilePathVideo(folderPath: string, recordingStart: string) {
+    return path.join(folderPath, this.sanitizeFilename(this.convertZoomDateToBolivia(recordingStart)));
+  }
+
   /**
   * Se necesita limpiar el nombre por que al nombrar archivos no se aceptas algunos caracteres
   * y esto impide colocar el nombre a un archivo que contenga estos caracteres
   */
   private sanitizeFilename(name: string): string {
-    return name.replace(/[+\/=]/g, '_');
+    return name.replace(/[+\/=]/g, '_').replace(/:/g, '-');
   }
 
   /**
@@ -83,5 +87,33 @@ export class ZoomFileService {
       throw error;
     }
   }
+
+  private convertZoomDateToBolivia(dateString: string): string {
+    const dateUtc = new Date(dateString);
+
+    const options: Intl.DateTimeFormatOptions = {
+      timeZone: "America/La_Paz",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "numeric",
+      second: "2-digit"
+    };
+
+    // Formateamos en un estándar fácil de manipular
+    let formatted = new Intl.DateTimeFormat("en-CA", options)
+      .format(dateUtc); // Devuelve: 2025-11-24 10:30:11
+
+    // Reemplazos para que sea válido como nombre de archivo
+    formatted = formatted
+      .replace(',', '')   // elimina coma
+      .replace(/:/g, '-') // cambia : por -
+      .replace(/\//g, '-') // por si acaso
+      .trim();
+
+    return formatted;
+  }
+
 
 }

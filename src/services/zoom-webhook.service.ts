@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createHmac } from 'crypto';
 import * as fs from 'fs';
-import { MeetingStartedEvent, RecordingCompletedEvent, RecordingStartedEvent, RecordingStoppedEvent, SummaryCompletedEvent, TranscriptCompletedEvent, ZoomWebhookEvent } from 'src/interfaces/miInterface.interface';
+import { MeetingStartedEvent, RecordingCompletedEvent, RecordingFileInfo, RecordingStartedEvent, RecordingStoppedEvent, SummaryCompletedEvent, TranscriptCompletedEvent, ZoomWebhookEvent } from 'src/interfaces/miInterface.interface';
 import axios from 'axios';
 import { ZoomFileService } from './zoom-file.service';
 
@@ -58,18 +58,18 @@ export class ZoomWebhookService {
    private async onRecordingCompleted(e: RecordingCompletedEvent) {
       try {
          const { download_token, payload } = e;
-         const recordedVideos = payload.object.recording_files.filter(obj => obj.file_type === 'MP4');
+         const recordedVideos: RecordingFileInfo[] = payload.object.recording_files.filter(obj => obj.file_type === 'MP4');
 
          const folderPath = this.zoomFileService.getFolderPath(payload.object.uuid);
 
          for (const file of recordedVideos) {
 
-            const fileName = `${file.id}.${file.file_extension.toLowerCase()}`;
+            const fileName = `${file.recording_start}`;
 
-            const filePath = this.zoomFileService.getFilePath(folderPath, fileName);
+            const filePath = this.zoomFileService.getFilePathVideo(folderPath, fileName);
 
-            //await this.zoomFileService.downloadFile(file.download_url, download_token, filePath, fileName);
-            await this.downloadVideo(download_token, file.download_url, filePath);
+            //await this.zoomFileService.downloadFile(file.download_url, download_token, filePath, `${fileName}mp4`);
+            await this.downloadVideo(download_token, file.download_url, `${filePath}${file.file_extension.toLowerCase()}`);
          }
       } catch (error) {
          console.error('Error:', error.response?.data || error.message);
