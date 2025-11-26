@@ -1,3 +1,4 @@
+import { AuditoriaEntity } from 'src/common/entities/auditoria.entity';
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Index('pk_audiencias_detalles', ['id'], { unique: true })
@@ -7,19 +8,19 @@ export class AudienciaDetalle extends AuditoriaEntity {
   id: string;
 
   @Column('int8', { name: 'id_audiencia' })
-  idAudiencia: Audiencia['id'];
+  idAudiencia: string //Audiencia['id'];
 
   @Column('int2', { name: 'id_sala_audiencia', nullable: true })
-  idSalaAudiencia: SalaAudiencia['id'];
+  idSalaAudiencia: number //SalaAudiencia['id'];
 
   @Column('int2', { name: 'id_estado_audiencia' })
-  idEstadoAudiencia: TipoEstadoAudiencia['id'];
+  idEstadoAudiencia: number //TipoEstadoAudiencia['id'];
 
   @Column('int8', { name: 'id_archivo_videograbacion', nullable: true })
-  idArchivoVideograbacion?: Documento['id'];
+  idArchivoVideograbacion?: string //Documento['id'];
 
   @Column('int8', { name: 'id_archivo_transcripcion_videograbacion', nullable: true })
-  idArchivoTranscripcionVideograbacion?: Documento['id'];
+  idArchivoTranscripcionVideograbacion?: string //Documento['id'];
 
   @Column('character varying', { name: 'modalidad', length: 10 })
   modalidad: string;

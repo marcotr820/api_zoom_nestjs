@@ -21,13 +21,15 @@ export class AppController {
       return { message: 'Body vacío' };
     }
 
-    if (body.payload.object.host_id === 'WDLZCfgCTke5vmWw5KtrUQ') {
-      //console.log(body);
+    /*if (body.payload.object.host_id === 'WDLZCfgCTke5vmWw5KtrUQ') {
       await this.zoomWebhookService.getCurrentMeet();
+    }*/
+
+    if (body.payload.object.host_id === 'WDLZCfgCTke5vmWw5KtrUQ') {
+      console.log(body);
+      return await this.zoomWebhookService.processEvent(body);
     }
-
-    //await this.zoomWebhookService.processEvent(body);
-
+    
     //await this.tokenService.getS2SToken();
 
     //return { status: 'ok' };

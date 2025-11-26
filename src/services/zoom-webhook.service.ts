@@ -15,14 +15,18 @@ import {
 import axios from 'axios';
 import { ZoomFileService } from './zoom-file.service';
 import { ZoomTokenService } from './zoom-token.service';
+import { AudienciasDetallesService } from 'src/jurisdiccional/audiecias-detalles/audiencias-detalles.service';
+import { UpdateAudienciaDetalleDto } from 'src/jurisdiccional/audiecias-detalles/dto/update-audiencia-detalle';
 
 @Injectable()
 export class ZoomWebhookService {
   private readonly zoomAppSecretToken = process.env.ZOOM_APP_SECRET_TOKEN ?? '';
   private readonly logger = new Logger(ZoomWebhookService.name);
 
-  constructor(private readonly zoomFileService: ZoomFileService,
-    private readonly zoomTokenService: ZoomTokenService
+  constructor(
+    private readonly zoomFileService: ZoomFileService,
+    private readonly zoomTokenService: ZoomTokenService,
+    private readonly audienciaDetalleService: AudienciasDetallesService,
   ) {}
 
   async processEvent(body: ZoomWebhookEvent) {
@@ -47,6 +51,10 @@ export class ZoomWebhookService {
   }
 
   private validateEndpoint(plainToken: string) {
+    console.log('LLAMADA A VALIDATE URL', plainToken);
+
+    console.log('SECRET TOKEN', this.zoomAppSecretToken);
+    
     return {
       plainToken,
       encryptedToken: createHmac('sha256', this.zoomAppSecretToken)
@@ -60,7 +68,9 @@ export class ZoomWebhookService {
   }
 
   private onRecordingStarted(e: RecordingStartedEvent) {
-    console.log('🎬 Grabación iniciada:');
+    const updateAudienciaDetalle: UpdateAudienciaDetalleDto = {}
+    this.audienciaDetalleService.updateAudienciaDetalle(
+      e.payload.object.uuid, updateAudienciaDetalle);
   }
 
   private onRecordingStopped(e: RecordingStoppedEvent) {
@@ -288,7 +298,6 @@ export class ZoomWebhookService {
     });
 
     console.log(res.data.uuid, res.data.status);
-    
   }
 
   /**
