@@ -18,16 +18,13 @@ export class SummaryCompletedPayloadDto extends ZoomEventBasePayloadDto {
 
 export class SummaryCompletedObjectDto {
 
-  @Expose({ name: 'meeting_uuid' })
   @IsString()
-  meetingUuid: string
+  meeting_uuid: string
 
-  @Expose({ name: 'summary_title' })
   @IsString()
-  summaryTitle: string
+  summary_title: string
 
-  @Expose({ name: 'summary_content' })
   @IsOptional()
   @IsString()
-  summaryContent?: string
+  summary_content?: string
 }

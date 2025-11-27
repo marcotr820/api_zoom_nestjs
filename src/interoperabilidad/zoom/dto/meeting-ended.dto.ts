@@ -3,6 +3,7 @@ import { ZoomEventBaseDto, ZoomEventBasePayloadDto } from "./event-base.dto";
 import { Expose, Type } from "class-transformer";
 
 export class MeetingEndedEventDto extends ZoomEventBaseDto {
+
   declare event: 'meeting.ended';
 
   @ValidateNested()
@@ -25,12 +26,10 @@ export class MeetingEndedObjectDto {
   @IsNumber()
   duration: number;
 
-  @Expose({ name: 'start_time' })
   @IsString()
-  startTime: string;
+  start_time: string;
 
-  @Expose({ name: 'end_time' })
   @IsString()
-  endTime: string;
+  end_time: string;
   
 }

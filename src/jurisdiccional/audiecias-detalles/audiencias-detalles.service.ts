@@ -15,14 +15,13 @@ export class AudienciasDetallesService {
 
   /**
    * Actualizar audiencia detalle
-   * @param uuid 
+   * @param idReunion 
    * @param updateAudienciaDetalleDto 
    * @returns 
    */
-  async updateAudienciaDetalle(uuid: string, updateAudienciaDetalleDto: UpdateAudienciaDetalleDto) {
-    return await this.dataSource
-      .transaction(async manager => {
-        return await this.audienciaDetalleRepository.updateTransaccion(manager, uuid, updateAudienciaDetalleDto);
+  async updateAudienciaDetalle(idReunion: string, dto: UpdateAudienciaDetalleDto) {
+    return await this.dataSource.transaction(async manager => {
+        return await this.audienciaDetalleRepository.updateTransaccion(manager, idReunion, dto);
       })
       .catch(e => {
         //throw new UnprocessableEntityException(e.message, Message.errorCreate(this.entityNameMessage));

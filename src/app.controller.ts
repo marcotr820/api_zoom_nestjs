@@ -1,6 +1,5 @@
 import { Body, Controller, HttpCode, Logger, Post } from '@nestjs/common';
 import { ZoomWebhookService } from './services/zoom-webhook.service';
-import { ZoomTokenService } from './services/zoom-token.service';
 import type { ZoomWebhookEventDto } from './interoperabilidad/zoom/dto/event-webhook.dto';
 
 @Controller('webhook')
@@ -8,9 +7,7 @@ export class AppController {
 
   private readonly logger = new Logger(AppController.name);
 
-  constructor(private readonly zoomWebhookService: ZoomWebhookService,
-    private readonly tokenService: ZoomTokenService
-  ){}
+  constructor(private readonly zoomWebhookService: ZoomWebhookService,){}
 
   @Post()
   @HttpCode(200)

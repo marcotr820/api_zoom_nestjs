@@ -14,7 +14,6 @@ export class ZoomUrlValidationEventDto extends ZoomEventBaseDto {
 
 export class ZoomUrlValidationPayloadDto extends ZoomEventBasePayloadDto {
 
-  @Expose({ name: 'plain_token' })
   @IsString()
-  declare plainToken: string;
+  declare plain_token: string;
 }

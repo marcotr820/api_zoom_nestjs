@@ -25,9 +25,8 @@ export class RecordingStoppedObjectDto {
   @IsString()
   topic: string;
 
-  @Expose({ name: 'start_time' })
   @IsString()
-  startTime: string;
+  start_time: string;
 
   @IsNumber()
   duration: number;

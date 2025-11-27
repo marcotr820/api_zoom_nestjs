@@ -4,9 +4,8 @@ import { Expose, Type } from "class-transformer";
 
 export class MeetingStartedObjectDto {
 
-  @Expose({ name: 'start_time' })
   @IsString()
-  startTime: string;
+  start_time: string;
 
   @Expose() 
   @IsString()
@@ -15,7 +14,6 @@ export class MeetingStartedObjectDto {
 }
 
 export class MeetingStartedPayloadDto extends ZoomEventBasePayloadDto {
-  @Expose()        // <-- ¡NECESARIO!
   @ValidateNested()
   @Type(() => MeetingStartedObjectDto)
   declare object: MeetingStartedObjectDto
@@ -35,7 +33,6 @@ export class MeetingStartedEventDto extends ZoomEventBaseDto {
   @Expose()
   declare event: 'meeting.started';
 
-  @Expose()
   @ValidateNested()
   @Type(() => MeetingStartedPayloadDto)
   declare payload: MeetingStartedPayloadDto;

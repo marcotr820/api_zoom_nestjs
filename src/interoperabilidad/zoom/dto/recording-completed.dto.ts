@@ -9,13 +9,11 @@ export class RecordingCompletedEventDto extends ZoomEventBaseDto {
   @Type(() => RecordingCompletedPayloadDto)
   declare payload: RecordingCompletedPayloadDto;
 
-  @Expose({ name: 'download_token' })
   @IsString()
-  declare downloadToken: string;
+  declare download_token: string;
 }
 
 export class RecordingCompletedPayloadDto extends ZoomEventBasePayloadDto {
-
   @ValidateNested()
   @Type(() => RecordingCompletedObjectDto)
   declare object: RecordingCompletedObjectDto;
@@ -25,41 +23,33 @@ export class RecordingCompletedObjectDto {
   @IsString()
   uuid: string
 
-  @Expose({ name: 'start_time' })
   @IsString()
-  startTime: string
+  start_time: string
 
-  @Expose({ name: 'recording_files' })
   @ValidateNested({ each: true })
   @Type(() => RecordingFileInfoDto)
-  recordingFiles: RecordingFileInfoDto[]
+  recording_files: RecordingFileInfoDto[]
 }
 
 export class RecordingFileInfoDto {
   @IsString()
   id: string
 
-  @Expose({ name: 'meeting_id' })
   @IsString()
-  meetingId: string
+  meeting_id: string
 
-  @Expose({ name: 'recording_start' })
   @IsString()
-  recordingStart: string
+  recording_start: string
 
-  @Expose({ name: 'recording_end' })
   @IsString()
-  recordingEnd: string
+  recording_end: string
 
-  @Expose({ name: 'file_type' })
   @IsString()
-  fileType: string
+  file_type: string
 
-  @Expose({ name: 'file_extension' })
   @IsString()
-  fileExtension: string
+  file_extension: string
 
-  @Expose({ name: 'download_url' })
   @IsString()
-  downloadUrl: string
+  download_url: string
 }

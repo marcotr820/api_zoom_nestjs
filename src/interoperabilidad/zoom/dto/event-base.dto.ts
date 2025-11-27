@@ -1,4 +1,4 @@
-import { IsString, IsOptional, ValidateNested } from 'class-validator';
+import { IsString, IsOptional, ValidateNested, IsNumber } from 'class-validator';
 import { Expose, Type } from 'class-transformer';
 
 export class ZoomEventBasePayloadDto {
@@ -6,14 +6,13 @@ export class ZoomEventBasePayloadDto {
   @IsOptional()
   object?: any;
 
-  @Expose({ name: 'plain_token' })
   @IsOptional()
   @IsString()
-  plainToken?: string;
+  plain_token?: string;
 }
 
 export class ZoomEventBaseDto {
-  @Expose()        // <-- ¡NECESARIO!
+
   @IsString()
   event: string;
 
@@ -22,10 +21,12 @@ export class ZoomEventBaseDto {
   @Type(() => ZoomEventBasePayloadDto)
   payload: ZoomEventBasePayloadDto;
 
-  @Expose({ name: 'download_token' })
   @IsOptional()
   @IsString()
-  downloadToken?: string;
+  download_token?: string;
+
+  @IsNumber()
+  event_ts: number
 }
 
 

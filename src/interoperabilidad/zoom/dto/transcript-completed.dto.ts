@@ -10,9 +10,8 @@ export class TranscriptCompletedEventDto extends ZoomEventBaseDto {
   @Type(() => TranscriptCompletedPayloadDto)
   declare payload: TranscriptCompletedPayloadDto;
 
-  @Expose({ name: 'download_token' })
   @IsString()
-  declare downloadToken: string;
+  declare download_token: string;
 }
 
 export class TranscriptCompletedPayloadDto extends ZoomEventBasePayloadDto {
@@ -28,29 +27,24 @@ export class TranscriptCompletedObjectDto {
   @IsNumber()
   id: number
 
-  @Expose({ name: 'recording_files' })
   @ValidateNested({ each: true })
   @Type(() => TranscriptFileInfoDto)
-  recordingFiles: TranscriptFileInfoDto[]
+  recording_files: TranscriptFileInfoDto[]
 }
 
 export class TranscriptFileInfoDto {
   @IsString()
   id: string
 
-  @Expose({ name: 'meeting_id' })
   @IsString()
-  meetingId: string
+  meeting_id: string
 
-  @Expose({ name: 'download_url' })
   @IsString()
-  downloadUrl: string
+  download_url: string
 
-  @Expose({ name: 'file_type' })
   @IsString()
-  fileType: string
+  file_type: string
 
-  @Expose({ name: 'file_extension' })
   @IsString()
-  fileExtension: string
+  file_extension: string
 }

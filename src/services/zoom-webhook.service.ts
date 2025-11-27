@@ -26,7 +26,7 @@ export class ZoomWebhookService {
   async processEvent(body: ZoomWebhookEventDto) {
     switch (body.event) {
       case 'endpoint.url_validation':
-        return this.validateEndpoint(body.payload.plainToken);
+        return this.validateEndpoint(body.payload.plain_token);
       case 'meeting.started':
         return this.onMeetingStarted(body);
       case 'recording.started':
@@ -59,35 +59,39 @@ export class ZoomWebhookService {
 
   private onMeetingStarted(e: MeetingStartedEventDto) {
     console.log('➡️ Reunión iniciada:');
-    console.log(e.payload.object.startTime);
+    console.log(e.payload.object.start_time);
   }
 
   private async onRecordingStarted(e: RecordingStartedEventDto) {
-    const updateAudienciaDetalle: UpdateAudienciaDetalleDto = {}
-    await this.audienciaDetalleService.updateAudienciaDetalle(
-      e.payload.object.uuid, updateAudienciaDetalle);
+    const updateAudienciaDetalle: UpdateAudienciaDetalleDto = {
+      fechaHoraInicioGrabacion: new Date(e.event_ts)
+    }
+    const idReunion = e.payload.object.uuid;
+    await this.audienciaDetalleService.updateAudienciaDetalle(idReunion, updateAudienciaDetalle);
   }
 
-  private onRecordingStopped(e: RecordingStoppedEventDto) {
-    console.log('🛑 Grabación detenida:');
+  private async onRecordingStopped(e: RecordingStoppedEventDto) {
+    const updateAudienciaDetalle: UpdateAudienciaDetalleDto = {
+      fechaHoraFinGrabacion: new Date(e.event_ts)
+    }
+    const idReunion = e.payload.object.uuid;
+    await this.audienciaDetalleService.updateAudienciaDetalle(idReunion, updateAudienciaDetalle);
   }
 
   private async onRecordingCompleted(e: RecordingCompletedEventDto) {
     console.log('➡️ Rcording completed:');
-    console.log(e);
-    
     try {
-      const { downloadToken, payload } = e;
+      const { download_token, payload } = e;
 
       const recordedVideos: RecordingFileInfoDto[] =
-        payload.object.recordingFiles.filter((obj) => obj.fileExtension === 'MP4');
+        payload.object.recording_files.filter((obj) => obj.file_extension === 'MP4');
 
       const folderPath = this.zoomFileService.getFolderPath(
         payload.object.uuid,
       );
 
       for (const file of recordedVideos) {
-        const fileName = `${file.recordingStart}`;
+        const fileName = `${file.recording_start}`;
 
         const filePath = this.zoomFileService.getFilePathVideo(
           folderPath,
@@ -96,9 +100,9 @@ export class ZoomWebhookService {
 
         //await this.zoomFileService.downloadFile(file.download_url, download_token, filePath, `${fileName}mp4`);
         await this.downloadVideo(
-          downloadToken,
-          file.downloadUrl,
-          `${filePath}${file.fileExtension.toLowerCase()}`,
+          download_token,
+          file.download_url,
+          `${filePath}${file.file_extension.toLowerCase()}`,
         );
       }
     } catch (error) {
@@ -146,17 +150,14 @@ export class ZoomWebhookService {
     try {
       const { payload } = e;
       const {
-        summaryTitle,
-        summaryContent,
-        meetingUuid
+        summary_title,
+        summary_content,
+        meeting_uuid
       } = payload.object;
 
-      const folderPath = this.zoomFileService.getFolderPath(meetingUuid);
+      const folderPath = this.zoomFileService.getFolderPath(meeting_uuid);
 
-      const filePath = this.zoomFileService.getFilePath(
-        folderPath,
-        meetingUuid,
-      );
+      const filePath = this.zoomFileService.getFilePath(folderPath, meeting_uuid);
 
       // Convertimos Markdown básico a HTML (solo reemplazando saltos de línea y títulos simples)
       const htmlContent = `
@@ -173,8 +174,8 @@ export class ZoomWebhookService {
                </style>
             </head>
             <body>
-               <h1>${summaryTitle}</h1>
-               ${this.markdownToHtml(summaryContent)}
+               <h1>${summary_title}</h1>
+               ${this.markdownToHtml(summary_content)}
             </body>
             </html>
          `;
@@ -237,7 +238,7 @@ export class ZoomWebhookService {
     console.log('➡️ transcript completed:');
     console.log(e);
     try {
-      const { downloadToken, payload } = e;
+      const { download_token, payload } = e;
       const folderPath = this.zoomFileService.getFolderPath(
         payload.object.uuid,
       );
@@ -246,13 +247,11 @@ export class ZoomWebhookService {
         e.payload.object.uuid,
       );
 
-      console.log(e);
-      
-      /*await this.downloadTranscription(
-        downloadToken,
-        e.payload.object.recordingFiles[0].downloadUrl,
+      await this.downloadTranscription(
+        download_token,
+        e.payload.object.recording_files[0].download_url,
         filePath,
-      );*/
+      );
     } catch (err) {
       console.error('Error al descargar la transcripción:', err.message);
       throw err;
@@ -286,25 +285,4 @@ export class ZoomWebhookService {
       throw err;
     }
   }
-
-  /*async getCurrentMeet() {
-    const accessToken = await this.zoomTokenService.getS2SToken();
-
-    const meetingId = this.extractMeetingId('https://organojudicial-gob-bo.zoom.us/j/5157599468?pwd=GMQiQCmQacYX76iyhYIsHNyEXWxNGK.1&omn=89745592454');
-
-    const url = `https://api.zoom.us/v2/meetings/${meetingId}`;
-
-    const res = await axios.get<ZoomMeetingDetails>(url, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-
-    console.log(res.data.uuid, res.data.status);
-  }*/
-
-  /*private extractMeetingId(url: string): string | null {
-    const match = url.match(/\/(j|s)\/(\d+)/);
-    return match ? match[2] : null;
-  }*/
 }
