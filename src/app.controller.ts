@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, Logger, Post } from '@nestjs/common';
-import type { MeetingStartedEvent, ZoomWebhookEvent } from './interfaces/miInterface.interface';
 import { ZoomWebhookService } from './services/zoom-webhook.service';
 import { ZoomTokenService } from './services/zoom-token.service';
+import type { ZoomWebhookEventDto } from './interoperabilidad/zoom/dto/event-webhook.dto';
 
 @Controller('webhook')
 export class AppController {
@@ -14,7 +14,7 @@ export class AppController {
 
   @Post()
   @HttpCode(200)
-  async handleWebhook(@Body() body: ZoomWebhookEvent) {
+  async handleWebhook(@Body() body: ZoomWebhookEventDto) {
 
     if (!body) {
       this.logger.warn('Webhook recibido sin body');
@@ -26,7 +26,6 @@ export class AppController {
     }*/
 
     if (body.payload.object.host_id === 'WDLZCfgCTke5vmWw5KtrUQ') {
-      console.log(body);
       return await this.zoomWebhookService.processEvent(body);
     }
     

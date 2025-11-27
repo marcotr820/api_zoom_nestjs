@@ -20,9 +20,9 @@ export class AudienciasDetallesService {
    * @returns 
    */
   async updateAudienciaDetalle(uuid: string, updateAudienciaDetalleDto: UpdateAudienciaDetalleDto) {
-    return this.dataSource
+    return await this.dataSource
       .transaction(async manager => {
-        return this.audienciaDetalleRepository.updateTransaccion(manager, uuid, updateAudienciaDetalleDto);
+        return await this.audienciaDetalleRepository.updateTransaccion(manager, uuid, updateAudienciaDetalleDto);
       })
       .catch(e => {
         //throw new UnprocessableEntityException(e.message, Message.errorCreate(this.entityNameMessage));
