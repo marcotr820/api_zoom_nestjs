@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
+import { TokenS2SResponseDto } from '../dto/token-s2s-response.dto';
 
 @Injectable()
 export class ZoomTokenService {
@@ -11,11 +12,15 @@ export class ZoomTokenService {
 
   constructor() { }
 
+  /**
+   * Obtener Token S2S
+   * @returns
+   */
   async getS2SToken(): Promise<string> {
     const credentials = Buffer.from(`${this.zoomAppCliendId}:${this.zoomAppClientSecret}`).toString('base64');
 
     try {
-      const response = await axios.post(
+      const response = await axios.post<TokenS2SResponseDto>(
         `https://zoom.us/oauth/token?grant_type=account_credentials&account_id=${this.zoomAppCountId}`,
         null,
         {
@@ -27,7 +32,6 @@ export class ZoomTokenService {
       );
 
       const token = response.data.access_token;
-      console.log(token);
       return token;
     } catch (error) {
       console.error('Error obteniendo token S2S:', error.response?.data || error.message);

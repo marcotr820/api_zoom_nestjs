@@ -44,11 +44,12 @@ export class ZoomWebhookService {
     }
   }
 
+  /**
+   * Evento validar url
+   * @param plainToken 
+   * @returns 
+   */
   private validateEndpoint(plainToken: string) {
-    console.log('LLAMADA A VALIDATE URL', plainToken);
-
-    console.log('SECRET TOKEN', this.zoomAppSecretToken);
-    
     return {
       plainToken,
       encryptedToken: createHmac('sha256', this.zoomAppSecretToken)
@@ -57,11 +58,19 @@ export class ZoomWebhookService {
     };
   }
 
+  /**
+   * Evento Reunion Iniciada
+   * @param e 
+   */
   private onMeetingStarted(e: MeetingStartedEventDto) {
     console.log('➡️ Reunión iniciada:');
     console.log(e.payload.object.start_time);
   }
 
+  /**
+   * Evento Grabacion iniciada
+   * @param e 
+   */
   private async onRecordingStarted(e: RecordingStartedEventDto) {
     const updateAudienciaDetalle: UpdateAudienciaDetalleDto = {
       fechaHoraInicioGrabacion: new Date(e.event_ts)
@@ -70,6 +79,10 @@ export class ZoomWebhookService {
     await this.audienciaDetalleService.updateAudienciaDetalle(idReunion, updateAudienciaDetalle);
   }
 
+  /**
+   * Evento Grabacion terminada
+   * @param e 
+   */
   private async onRecordingStopped(e: RecordingStoppedEventDto) {
     const updateAudienciaDetalle: UpdateAudienciaDetalleDto = {
       fechaHoraFinGrabacion: new Date(e.event_ts)
@@ -78,6 +91,10 @@ export class ZoomWebhookService {
     await this.audienciaDetalleService.updateAudienciaDetalle(idReunion, updateAudienciaDetalle);
   }
 
+  /**
+   * Evento Grabacion completa
+   * @param e 
+   */
   private async onRecordingCompleted(e: RecordingCompletedEventDto) {
     console.log('➡️ Rcording completed:');
     try {
@@ -98,7 +115,6 @@ export class ZoomWebhookService {
           fileName,
         );
 
-        //await this.zoomFileService.downloadFile(file.download_url, download_token, filePath, `${fileName}mp4`);
         await this.downloadVideo(
           download_token,
           file.download_url,
@@ -125,7 +141,7 @@ export class ZoomWebhookService {
 
     const response = await axios.get(download_url, {
       headers: {
-        Authorization: `Bearer ${download_token}`, // token del que viene en el evento recording.completed -> e.download_token
+        Authorization: `Bearer ${download_token}`,
       },
       responseType: 'stream',
     });
@@ -133,8 +149,8 @@ export class ZoomWebhookService {
     response.data.pipe(writer);
 
     await new Promise<void>((resolve, reject) => {
-      writer.on('finish', () => resolve()); // ✅ envolver en arrow sin parámetros
-      writer.on('error', (err) => reject(err)); // ✅ pasar el error explícitamente
+      writer.on('finish', () => resolve());
+      writer.on('error', (err) => reject(err));
     });
 
     this.logger.log(`Video guardado en ${filePath}`);
@@ -146,7 +162,6 @@ export class ZoomWebhookService {
    */
   private onSummaryCompleted(e: SummaryCompletedEventDto) {
     console.log('➡️ Summary completed:');
-    console.log(e);
     try {
       const { payload } = e;
       const {
@@ -206,7 +221,7 @@ export class ZoomWebhookService {
         converted = converted.replace(/^# (.*$)/gim, '<h1>$1</h1>');
 
         // Convertir listas
-        converted = converted.replace(/^\- (.*$)/gim, '<li>$1</li>');
+        converted = converted.replace(/^- (.*$)/gim, '<li>$1</li>'); //TODO>M
         converted = converted.replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>');
 
         // Convertir links
@@ -236,7 +251,6 @@ export class ZoomWebhookService {
    */
   private async onTranscriptCompleted(e: TranscriptCompletedEventDto) {
     console.log('➡️ transcript completed:');
-    console.log(e);
     try {
       const { download_token, payload } = e;
       const folderPath = this.zoomFileService.getFolderPath(

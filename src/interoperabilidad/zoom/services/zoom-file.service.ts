@@ -10,6 +10,11 @@ export class ZoomFileService {
 
   constructor() { }
 
+  /**
+   * Obtener folder path del archivo
+   * @param meetingId 
+   * @returns 
+   */
   getFolderPath(
     meetingId: string,
   ) {
@@ -31,11 +36,22 @@ export class ZoomFileService {
     return folderPath;
   }
 
+  /**
+   * Obtener filePath
+   * @param folderPath 
+   * @param fileName 
+   * @returns 
+   */
   getFilePath(folderPath: string, fileName: string) {
-    //const fileName = `${file.id}.${file.file_extension.toLowerCase()}`;
     return path.join(folderPath, this.sanitizeFilename(fileName)); // ← aquí es donde se guarda el archivo
   }
 
+  /**
+   * Obtener filePath video
+   * @param folderPath 
+   * @param recordingStart 
+   * @returns 
+   */
   getFilePathVideo(folderPath: string, recordingStart: string) {
     return path.join(folderPath, this.sanitizeFilename(this.convertZoomDateToBolivia(recordingStart)));
   }
@@ -88,6 +104,11 @@ export class ZoomFileService {
     }
   }
 
+  /**
+   * Convertir fecha DD-MM-YYYY HH:MM:SS
+   * @param dateString 
+   * @returns 
+   */
   private convertZoomDateToBolivia(dateString: string): string {
     const dateUtc = new Date(dateString);
 
