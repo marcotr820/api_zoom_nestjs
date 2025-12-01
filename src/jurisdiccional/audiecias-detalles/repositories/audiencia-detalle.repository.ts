@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { UpdateAudienciaDetalleDto } from '../dto/update-audiencia-detalle';
 import { AudienciaDetalle } from '../entities/audiencia-detalle.entity';
@@ -6,6 +6,8 @@ import { AudienciaDetalle } from '../entities/audiencia-detalle.entity';
 @Injectable()
 export class AudienciaDetalleRepository {
 
+  private readonly logger = new Logger(AudienciaDetalleRepository.name);
+  
   constructor(private dataSource: DataSource){}
 
   /**
@@ -54,9 +56,8 @@ export class AudienciaDetalleRepository {
     try {
       return await manager.getRepository(AudienciaDetalle).findOne({ where: { idReunion } });
     } catch (error) {
-      console.error('Error al obtener AudienciaDetalle por idReunion:', error);
+      this.logger.error('Error al obtener AudienciaDetalle por idReunion:', error);
     }
-    
   }
 
   /**

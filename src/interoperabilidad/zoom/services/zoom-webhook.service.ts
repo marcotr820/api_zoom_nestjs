@@ -63,8 +63,8 @@ export class ZoomWebhookService {
    * @param e 
    */
   private onMeetingStarted(e: MeetingStartedEventDto) {
-    console.log('➡️ Reunión iniciada:');
-    console.log(e.payload.object.start_time);
+    //console.log('➡️ Reunión iniciada:');
+    //console.log(e.payload.object.start_time);
   }
 
   /**
@@ -96,7 +96,7 @@ export class ZoomWebhookService {
    * @param e 
    */
   private async onRecordingCompleted(e: RecordingCompletedEventDto) {
-    console.log('➡️ Rcording completed:');
+    //console.log('Recording completed:');
     try {
       const { download_token, payload } = e;
 
@@ -161,7 +161,6 @@ export class ZoomWebhookService {
    * @param e
    */
   private onSummaryCompleted(e: SummaryCompletedEventDto) {
-    console.log('➡️ Summary completed:');
     try {
       const { payload } = e;
       const {
@@ -250,7 +249,7 @@ export class ZoomWebhookService {
    * @param e
    */
   private async onTranscriptCompleted(e: TranscriptCompletedEventDto) {
-    console.log('➡️ transcript completed:');
+    //console.log('transcript completed:');
     try {
       const { download_token, payload } = e;
       const folderPath = this.zoomFileService.getFolderPath(

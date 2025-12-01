@@ -15,11 +15,9 @@ export class ZoomFileService {
    * @param meetingId 
    * @returns 
    */
-  getFolderPath(
-    meetingId: string,
-  ) {
+  getFolderPath(meetingId: string) {
     // Crear carpeta si no existe
-    const dir = path.join(process.cwd(), 'files');
+    const dir = path.join(process.cwd(), 'uploads');
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -30,7 +28,7 @@ export class ZoomFileService {
     // Verifica si existe la carpeta específica
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath);
-      console.log(`Carpeta "${folderPath}" creada dentro de "files"`);
+      //console.log(`Carpeta "${folderPath}" creada dentro de "files"`);
     }
 
     return folderPath;
@@ -67,7 +65,7 @@ export class ZoomFileService {
   /**
    * Guarda un stream en un archivo
    */
-  private async saveStreamToFile(stream: NodeJS.ReadableStream, filePath: string) {
+  /*private async saveStreamToFile(stream: NodeJS.ReadableStream, filePath: string) {
     return new Promise<void>((resolve, reject) => {
       const writer = fs.createWriteStream(filePath);
       stream.pipe(writer);
@@ -75,13 +73,13 @@ export class ZoomFileService {
       writer.on('finish', resolve);
       writer.on('error', reject);
     });
-  }
+  }*/
 
   /**
    * Descarga cualquier archivo desde una URL con token Bearer
    * y lo guarda en la carpeta correspondiente
    */
-  async downloadFile(
+  /*async downloadFile(
     download_url: string,
     token: string,
     filePath: string,
@@ -90,7 +88,7 @@ export class ZoomFileService {
     try {
       const response = await axios.get(download_url, {
         headers: { Authorization: `Bearer ${token}` },
-        responseType: 'stream', // Muy importante para archivos grandes
+        responseType: 'stream',
       });
 
       // Guardar el stream en disco
@@ -102,7 +100,7 @@ export class ZoomFileService {
       this.logger.error(`Error descargando archivo ${filename}: ${error.message}`);
       throw error;
     }
-  }
+  }*/
 
   /**
    * Convertir fecha DD-MM-YYYY HH:MM:SS
