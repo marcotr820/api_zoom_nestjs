@@ -8,7 +8,7 @@ export class AudienciaDetalleRepository {
 
   private readonly logger = new Logger(AudienciaDetalleRepository.name);
   
-  constructor(private dataSource: DataSource){}
+  constructor(/*private dataSource: DataSource*/){}
 
   /**
    * Actualizar audiencia_detalle
@@ -21,27 +21,27 @@ export class AudienciaDetalleRepository {
     idReunion: string,
     dto: UpdateAudienciaDetalleDto,
   ) {
-    const repoAD = managerParam.getRepository(AudienciaDetalle);
+    // const repoAD = managerParam.getRepository(AudienciaDetalle);
 
-    const audienciaDetalleBd = await this.findByUuid(idReunion, managerParam);
+    // const audienciaDetalleBd = await this.findByUuid(idReunion, managerParam);
 
-    if (!audienciaDetalleBd) return;
+    // if (!audienciaDetalleBd) return;
 
-    if (audienciaDetalleBd.fechaHoraInicioGrabacion && dto.fechaHoraFinGrabacion) {
-      const finGrabacion = new Date(dto.fechaHoraFinGrabacion).getTime();
-      const inicioGrabacion = new Date(audienciaDetalleBd.fechaHoraInicioGrabacion).getTime();
-      const duracionGrabacion = finGrabacion - inicioGrabacion;
-      dto.duracionGrabacion = this.convertHHMMSS(duracionGrabacion);
-    }
+    // if (audienciaDetalleBd.fechaHoraInicioGrabacion && dto.fechaHoraFinGrabacion) {
+    //   const finGrabacion = new Date(dto.fechaHoraFinGrabacion).getTime();
+    //   const inicioGrabacion = new Date(audienciaDetalleBd.fechaHoraInicioGrabacion).getTime();
+    //   const duracionGrabacion = finGrabacion - inicioGrabacion;
+    //   dto.duracionGrabacion = this.convertHHMMSS(duracionGrabacion);
+    // }
     
-    const entity = await repoAD.preload({
-      id: audienciaDetalleBd.id,
-      ...dto,
-    });
+    // const entity = await repoAD.preload({
+    //   id: audienciaDetalleBd.id,
+    //   ...dto,
+    // });
 
-    if (!entity) return;
+    // if (!entity) return;
 
-    await repoAD.save(entity);
+    // await repoAD.save(entity);
   }
 
   //TODO:M crear un metodo para obtener el audiencia_detalle por uuid
@@ -52,12 +52,12 @@ export class AudienciaDetalleRepository {
    * @returns 
    */
   async findByUuid (idReunion: string, managerParam?: EntityManager) {
-    const manager = managerParam ?? this.dataSource.manager;
-    try {
-      return await manager.getRepository(AudienciaDetalle).findOne({ where: { idReunion } });
-    } catch (error) {
-      this.logger.error('Error al obtener AudienciaDetalle por idReunion:', error);
-    }
+    // const manager = managerParam ?? this.dataSource.manager;
+    // try {
+    //   //return await manager.getRepository(AudienciaDetalle).findOne({ where: { idReunion } });
+    // } catch (error) {
+    //   this.logger.error('Error al obtener AudienciaDetalle por idReunion:', error);
+    // }
   }
 
   /**
