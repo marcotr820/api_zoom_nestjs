@@ -16,6 +16,9 @@ export class ZoomController {
       return { message: 'Body vacío' };
     }
 
+    console.log(body.event, '-', body.payload.object.topic);
+    
+
     return await this.zoomWebhookService.processEvent(body);
   }
 }
