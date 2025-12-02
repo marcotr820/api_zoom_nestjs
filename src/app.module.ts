@@ -15,8 +15,8 @@ import { AudienciasDetallesModule } from './jurisdiccional/audiecias-detalles/au
 const envFile = process.env.NODE_ENV ? `.env.${process.env.NODE_ENV}` : '.env';
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, envFilePath: [envFile], validationSchema: configValidationSchema }),
-    TypeOrmModule.forRootAsync(typeOrmConfigAsync),
+    ConfigModule.forRoot(/*{ isGlobal: true, envFilePath: [envFile], validationSchema: configValidationSchema }*/),
+    //TypeOrmModule.forRootAsync(typeOrmConfigAsync),
     JurisdiccionalModule,
     InteroperabilidadModule,
     AudienciasDetallesModule,
