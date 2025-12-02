@@ -27,7 +27,7 @@ export class ZoomWebhookService {
     switch (body.event) {
       case 'endpoint.url_validation':
         return this.validateEndpoint(body.payload.plain_token);
-      case 'meeting.started':
+      /*case 'meeting.started':
         return this.onMeetingStarted(body);
       case 'recording.started':
         return this.onRecordingStarted(body);
@@ -38,7 +38,7 @@ export class ZoomWebhookService {
       case 'recording.transcript_completed':
         return this.onTranscriptCompleted(body);
       case 'recording.completed':
-        return this.onRecordingCompleted(body);
+        return this.onRecordingCompleted(body);*/
       default:
         break;
     }
